@@ -15,7 +15,7 @@ Click the badge to open the game's charts page on [SteamDB](https://steamdb.info
 
 ## Installation
 1. Download the prebuilt release from [Releases](https://github.com/swindlesmccoop/playercount-badge/releases); do not download the source code zip, download the actual release.
-2. Unzip the folder into `~/.local/share/millennium/plugins/` (make sure it doesn't become nested and look like playercount-badge/playercount-badge/[repo]`)
+2. Unzip the folder into `~/.local/share/millennium/plugins/` (make sure it doesn't become nested and look like `playercount-badge/playercount-badge/[repo]`)
 3. Restart Steam, enable the plugin, click Save, and restart Steam again.
 
 ## Manual Installation/Building
