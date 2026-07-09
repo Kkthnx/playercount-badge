@@ -1,0 +1,24 @@
+services:
+  build:
+    build: .
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - node_modules:/workspace/node_modules
+      - pnpm-store:/workspace/.pnpm-store
+    command: sh -c "pnpm install && pnpm run build"
+
+  shell:
+    build: .
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - node_modules:/workspace/node_modules
+      - pnpm-store:/workspace/.pnpm-store
+    stdin_open: true
+    tty: true
+    command: sh
+
+volumes:
+  node_modules:
+  pnpm-store:

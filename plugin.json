@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SteamClientHomebrew/Millennium/main/src/sys/plugin-schema.json",
+  "name": "playercount-status",
+  "common_name": "Player Count",
+  "description": "Show live Steam player counts on game library pages in desktop mode.",
+  "author": "swindlesmccoop",
+  "version": "1.0.0",
+  "useBackend": true,
+  "backendType": "lua"
+}
