@@ -2,6 +2,8 @@
 Show live Steam player counts in the game details stats row (next to Play Time and Achievements) in Steam Desktop mode, similar to [playcount-decky](https://github.com/itsOwen/playcount-decky) which unfortunately only works in Big Picture mode.
 Click the badge to open the game's charts page on [SteamDB](https://steamdb.info/).
 
+![Badge Example](images/screenshot.png)
+
 ## Features
 - Live player count from Valve's public Steam Web API (no API key required)
 - Refreshes every 30 seconds while a game is selected
