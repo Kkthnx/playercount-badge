@@ -1,6 +1,6 @@
-export const BADGE_ID = 'playercount-status-badge';
+export const BADGE_ID = 'playercount-badge';
 export const PROTONDB_BADGE_ID = 'protondb-status-badge';
-export const STORAGE_KEY_SHOW = 'playercount-status.show';
+export const STORAGE_KEY_SHOW = 'playercount-badge.show';
 export const REFRESH_INTERVAL_MS = 30_000;
 export const ACHIEVEMENTS_WAIT_MS = 400;
 
