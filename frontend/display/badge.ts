@@ -207,9 +207,12 @@ export function createBadge(playerCount: PlayerCount, appId: number, doc: Docume
   iconDiv.style.display = 'flex';
   iconDiv.style.alignItems = 'center';
   iconDiv.style.justifyContent = 'center';
-  iconDiv.style.alignSelf = 'stretch';
+  iconDiv.style.alignSelf = 'center';
+  iconDiv.style.marginTop = 'auto';
+  iconDiv.style.marginBottom = 'auto';
   iconDiv.style.width = '26px';
-  iconDiv.style.marginRight = '6px';
+  iconDiv.style.height = '24px';
+  iconDiv.style.marginRight = '4px';
   iconDiv.style.flexShrink = '0';
   iconDiv.appendChild(createPlayersIcon(doc));
 
