@@ -146,9 +146,11 @@ const PLAYERS_ICON_PATH =
 
 function createPlayersIcon(doc: Document): SVGSVGElement {
   const svg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 52 32');
-  svg.setAttribute('width', '28');
-  svg.setAttribute('height', '17');
+  // Tight viewBox around the glyph itself (traced bounds x:13-38, y:3-28,
+  // plus 1px padding) so no transparent space inflates the icon or its gap.
+  svg.setAttribute('viewBox', '12 2 27 27');
+  svg.setAttribute('width', '24');
+  svg.setAttribute('height', '24');
   svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 
   const path = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -206,7 +208,7 @@ export function createBadge(playerCount: PlayerCount, appId: number, doc: Docume
   iconDiv.style.alignItems = 'center';
   iconDiv.style.justifyContent = 'center';
   iconDiv.style.alignSelf = 'stretch';
-  iconDiv.style.width = '32px';
+  iconDiv.style.width = '26px';
   iconDiv.style.marginRight = '6px';
   iconDiv.style.flexShrink = '0';
   iconDiv.appendChild(createPlayersIcon(doc));
