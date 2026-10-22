@@ -196,7 +196,16 @@ export function createBadge(playerCount: PlayerCount, appId: number, doc: Docume
   });
 
   const iconDiv = doc.createElement('div');
-  iconDiv.className = [c('GameStatIcon'), c('GameStatIconVariant')].filter(Boolean).join(' ');
+  // Style the icon container ourselves instead of reusing Steam's icon
+  // classes. Those classes are version-dependent: on newer Steam clients they
+  // paint the wrong glyph (a clock) instead of our people icon.
+  iconDiv.style.display = 'flex';
+  iconDiv.style.alignItems = 'center';
+  iconDiv.style.justifyContent = 'center';
+  iconDiv.style.width = '24px';
+  iconDiv.style.height = '24px';
+  iconDiv.style.marginRight = '8px';
+  iconDiv.style.flexShrink = '0';
   iconDiv.appendChild(createUsersIcon(doc));
 
   const rightDiv = doc.createElement('div');
