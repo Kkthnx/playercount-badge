@@ -138,22 +138,25 @@ export function ensureBadgePosition(row: HTMLElement, badge: HTMLElement): void 
   }
 }
 
-// SteamDB's single-player silhouette, recolored to Steam's neutral icon gray.
-// Bundled as a data URI so the badge never depends on the network or on
-// Steam's version-dependent icon classes.
-const PLAYERS_ICON_DATA_URI =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAAgCAYAAABdP1tmAAABdElEQVR42u3YTytEURjH8Y8/NQpbKymJUMq/LKxkoSwVKwsSCy/AeyDKTkRR8gJkZ0WJlIXJgndgoWxsKQt3oUlj7sw9M3OHX93FPefXqe85z3N6zlO3vXukllSvxlRzQI0B1+7CEibQHo29IItjXKQJaAxnaMsZ78BIBLqGrTSEXAYHP8DkahNDaQAaxUCB3tk0AA3E8PalAaglhrf5/9quANBzIG/FgMZieLuTDrsQQL0xvZlqB7qO4X3Ca7UDXcbw3qUhh65wUuDprKcB6D2C+k2Pabnl4CFmuDVUO9BtVG3nAz789v9R7UDv2Mgzvx8i3CpZ+mRCLRwSaDjP3GCox2aSL9Zm9KAfk5jL451HZ5RnWdwnFYJJAE1jEePfegeFaDz64A032MNpKZdEY4l5sIeFBDalFVPRyZ5hudiSqJQc2kkIJneDZ3BebBVeLNCEr85NKI1gtZxAq8JrpZw51JV02f+DmsoJNPqXegr/QEnqE32eNGmBn48cAAAAAElFTkSuQmCC';
+// SteamDB's single-player silhouette, traced to a vector path and painted in
+// Steam's neutral icon gray. Inline SVG renders deterministically at the
+// exact size requested, unlike raster images in Steam's client.
+const PLAYERS_ICON_PATH =
+  'M23.0,3.0L21.0,5.0L21.0,10.0L20.0,11.0L20.0,12.0L21.0,13.0L21.0,15.0L22.0,16.0L22.0,18.0L23.0,19.0L23.0,21.0L22.0,22.0L21.0,22.0L20.0,23.0L17.0,23.0L16.0,24.0L15.0,24.0L14.0,25.0L14.0,26.0L13.0,27.0L13.0,28.0L38.0,28.0L38.0,27.0L37.0,26.0L37.0,25.0L36.0,24.0L35.0,24.0L34.0,23.0L31.0,23.0L28.0,20.0L28.0,19.0L29.0,18.0L29.0,17.0L30.0,16.0L30.0,15.0L31.0,14.0L31.0,6.0L28.0,3.0Z';
 
-function createPlayersIcon(doc: Document): HTMLImageElement {
-  const img = doc.createElement('img');
-  img.src = PLAYERS_ICON_DATA_URI;
-  img.alt = '';
-  img.draggable = false;
-  img.style.width = '28px';
-  img.style.height = 'auto';
-  img.style.display = 'block';
-  img.style.flexShrink = '0';
-  return img;
+function createPlayersIcon(doc: Document): SVGSVGElement {
+  const svg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 52 32');
+  svg.setAttribute('width', '28');
+  svg.setAttribute('height', '17');
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+  const path = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('fill', '#8f98a0');
+  path.setAttribute('d', PLAYERS_ICON_PATH);
+  svg.appendChild(path);
+
+  return svg;
 }
 
 export function updateBadgeValue(badge: HTMLElement, playerCount: PlayerCount): void {
@@ -204,7 +207,7 @@ export function createBadge(playerCount: PlayerCount, appId: number, doc: Docume
   iconDiv.style.justifyContent = 'center';
   iconDiv.style.alignSelf = 'stretch';
   iconDiv.style.width = '32px';
-  iconDiv.style.marginRight = '8px';
+  iconDiv.style.marginRight = '6px';
   iconDiv.style.flexShrink = '0';
   iconDiv.appendChild(createPlayersIcon(doc));
 
@@ -213,7 +216,7 @@ export function createBadge(playerCount: PlayerCount, appId: number, doc: Docume
 
   const labelSpan = doc.createElement('span');
   labelSpan.className = c('PlayBarLabel');
-  labelSpan.textContent = 'PLAYERS';
+  labelSpan.textContent = 'Players';
 
   const valueSpan = doc.createElement('span');
   valueSpan.className = c('PlayBarDetailLabel');
