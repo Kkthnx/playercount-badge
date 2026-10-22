@@ -138,22 +138,22 @@ export function ensureBadgePosition(row: HTMLElement, badge: HTMLElement): void 
   }
 }
 
-function createUsersIcon(doc: Document): SVGSVGElement {
-  const svg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('width', '26');
-  svg.setAttribute('height', '26');
-  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+// SteamDB's single-player silhouette, recolored to Steam's neutral icon gray.
+// Bundled as a data URI so the badge never depends on the network or on
+// Steam's version-dependent icon classes.
+const PLAYERS_ICON_DATA_URI =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAAgCAYAAABdP1tmAAABdElEQVR42u3YTytEURjH8Y8/NQpbKymJUMq/LKxkoSwVKwsSCy/AeyDKTkRR8gJkZ0WJlIXJgndgoWxsKQt3oUlj7sw9M3OHX93FPefXqe85z3N6zlO3vXukllSvxlRzQI0B1+7CEibQHo29IItjXKQJaAxnaMsZ78BIBLqGrTSEXAYHP8DkahNDaQAaxUCB3tk0AA3E8PalAaglhrf5/9quANBzIG/FgMZieLuTDrsQQL0xvZlqB7qO4X3Ca7UDXcbw3qUhh65wUuDprKcB6D2C+k2Pabnl4CFmuDVUO9BtVG3nAz789v9R7UDv2Mgzvx8i3CpZ+mRCLRwSaDjP3GCox2aSL9Zm9KAfk5jL451HZ5RnWdwnFYJJAE1jEePfegeFaDz64A032MNpKZdEY4l5sIeFBDalFVPRyZ5hudiSqJQc2kkIJneDZ3BebBVeLNCEr85NKI1gtZxAq8JrpZw51JV02f+DmsoJNPqXegr/QEnqE32eNGmBn48cAAAAAElFTkSuQmCC';
 
-  const path = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('fill', 'currentColor');
-  path.setAttribute(
-    'd',
-    'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
-  );
-  svg.appendChild(path);
-
-  return svg;
+function createPlayersIcon(doc: Document): HTMLImageElement {
+  const img = doc.createElement('img');
+  img.src = PLAYERS_ICON_DATA_URI;
+  img.alt = '';
+  img.draggable = false;
+  img.style.width = '28px';
+  img.style.height = 'auto';
+  img.style.display = 'block';
+  img.style.flexShrink = '0';
+  return img;
 }
 
 export function updateBadgeValue(badge: HTMLElement, playerCount: PlayerCount): void {
@@ -203,12 +203,10 @@ export function createBadge(playerCount: PlayerCount, appId: number, doc: Docume
   iconDiv.style.alignItems = 'center';
   iconDiv.style.justifyContent = 'center';
   iconDiv.style.alignSelf = 'stretch';
-  iconDiv.style.width = '28px';
+  iconDiv.style.width = '32px';
   iconDiv.style.marginRight = '8px';
   iconDiv.style.flexShrink = '0';
-  // Neutral Steam gray like the other tile icons; the count keeps the tier color.
-  iconDiv.style.color = '#8f98a0';
-  iconDiv.appendChild(createUsersIcon(doc));
+  iconDiv.appendChild(createPlayersIcon(doc));
 
   const rightDiv = doc.createElement('div');
   rightDiv.className = c('GameStatRight');
