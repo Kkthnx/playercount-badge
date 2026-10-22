@@ -141,8 +141,8 @@ export function ensureBadgePosition(row: HTMLElement, badge: HTMLElement): void 
 function createUsersIcon(doc: Document): SVGSVGElement {
   const svg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('width', '23');
-  svg.setAttribute('height', '23');
+  svg.setAttribute('width', '26');
+  svg.setAttribute('height', '26');
   svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 
   const path = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -202,10 +202,12 @@ export function createBadge(playerCount: PlayerCount, appId: number, doc: Docume
   iconDiv.style.display = 'flex';
   iconDiv.style.alignItems = 'center';
   iconDiv.style.justifyContent = 'center';
-  iconDiv.style.width = '24px';
-  iconDiv.style.height = '24px';
+  iconDiv.style.alignSelf = 'stretch';
+  iconDiv.style.width = '28px';
   iconDiv.style.marginRight = '8px';
   iconDiv.style.flexShrink = '0';
+  // Neutral Steam gray like the other tile icons; the count keeps the tier color.
+  iconDiv.style.color = '#8f98a0';
   iconDiv.appendChild(createUsersIcon(doc));
 
   const rightDiv = doc.createElement('div');
