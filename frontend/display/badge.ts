@@ -30,6 +30,16 @@ export interface ToolbarTarget {
   doc: Document;
 }
 
+function applyColor(el: HTMLElement, color: string): void {
+  if (color) {
+    el.style.color = color;
+  } else {
+    // Empty color means the "No colors" scheme: drop the inline style so
+    // Steam's default text color applies.
+    el.style.removeProperty('color');
+  }
+}
+
 let lastOpenMs = 0;
 
 function openSteamDbCharts(appId: number): void {
@@ -148,12 +158,12 @@ function createUsersIcon(doc: Document): SVGSVGElement {
 
 export function updateBadgeValue(badge: HTMLElement, playerCount: PlayerCount): void {
   const color = colorForPlayerCount(playerCount.count);
-  badge.style.color = color;
+  applyColor(badge, color);
 
   const valueSpan = badge.querySelector('[data-playercount-value="true"]') as HTMLElement | null;
   if (valueSpan) {
     valueSpan.textContent = playerCount.formatted;
-    valueSpan.style.color = color;
+    applyColor(valueSpan, color);
   }
 }
 
@@ -163,7 +173,7 @@ export function createBadge(playerCount: PlayerCount, appId: number, doc: Docume
   const tile = doc.createElement('div');
   tile.id = BADGE_ID;
   tile.className = [c('GameStat'), c('GameStatWithIcon')].filter(Boolean).join(' ');
-  tile.style.color = color;
+  applyColor(tile, color);
   tile.style.cursor = 'pointer';
   tile.style.pointerEvents = 'auto';
   tile.title = 'Open SteamDB charts';
@@ -200,7 +210,7 @@ export function createBadge(playerCount: PlayerCount, appId: number, doc: Docume
   valueSpan.className = c('PlayBarDetailLabel');
   valueSpan.setAttribute('data-playercount-value', 'true');
   valueSpan.textContent = playerCount.formatted;
-  valueSpan.style.color = color;
+  applyColor(valueSpan, color);
 
   rightDiv.appendChild(labelSpan);
   rightDiv.appendChild(valueSpan);

@@ -1,5 +1,6 @@
 import { UIMode, detectGamePage } from './detector';
 import { clearPlayerCountCache, fetchPlayerCount } from '../services/playerCountApi';
+import type { PlayerCount } from '../services/playerCountApi';
 import {
   createBadge,
   ensureBadgePosition,
@@ -10,8 +11,8 @@ import {
 import {
   ACHIEVEMENTS_WAIT_MS,
   BADGE_ID,
+  getRefreshIntervalSeconds,
   isPluginEnabled,
-  REFRESH_INTERVAL_MS,
 } from '../constants';
 
 let observer: MutationObserver | null = null;
@@ -20,11 +21,21 @@ let refreshIntervalId: ReturnType<typeof setInterval> | null = null;
 let currentAppId: number | null = null;
 let processingAppId: number | null = null;
 let panelDoc: Document | null = null;
+let lastPlayerCount: PlayerCount | null = null;
 
 function clearRefreshInterval(): void {
   if (refreshIntervalId !== null) {
     clearInterval(refreshIntervalId);
     refreshIntervalId = null;
+  }
+}
+
+// Re-applies the current color scheme to the visible badge without
+// re-fetching. Called when the user changes color settings.
+export function refreshBadgeColors(): void {
+  const badge = panelDoc?.getElementById(BADGE_ID) as HTMLElement | null;
+  if (badge && lastPlayerCount) {
+    updateBadgeValue(badge, lastPlayerCount);
   }
 }
 
@@ -38,11 +49,13 @@ function resetStateForNoGame(): void {
   clearCurrentBadge();
   currentAppId = null;
   processingAppId = null;
+  lastPlayerCount = null;
 }
 
 function startRefreshLoop(appId: number): void {
   clearRefreshInterval();
 
+  const intervalMs = getRefreshIntervalSeconds() * 1000;
   refreshIntervalId = setInterval(async () => {
     if (currentAppId !== appId || !isPluginEnabled()) return;
 
@@ -52,8 +65,17 @@ function startRefreshLoop(appId: number): void {
     const playerCount = await fetchPlayerCount(appId, { bypassCache: true });
     if (currentAppId !== appId || !playerCount) return;
 
+    lastPlayerCount = playerCount;
     updateBadgeValue(badge, playerCount);
-  }, REFRESH_INTERVAL_MS);
+  }, intervalMs);
+}
+
+// Restarts the refresh loop with the currently configured interval.
+// Called when the user changes the refresh setting.
+export function applyRefreshInterval(): void {
+  if (currentAppId !== null && refreshIntervalId !== null) {
+    startRefreshLoop(currentAppId);
+  }
 }
 
 export function disconnectObserver(): void {
@@ -68,6 +90,7 @@ export function disconnectObserver(): void {
   currentAppId = null;
   processingAppId = null;
   panelDoc = null;
+  lastPlayerCount = null;
   clearPlayerCountCache();
 }
 
@@ -172,6 +195,7 @@ async function _handleGamePage(doc: Document, mode: UIMode): Promise<void> {
 
   const badge = createBadge(playerCount, appId, freshTarget.doc);
   insertBadgeInRow(freshTarget.row, badge);
+  lastPlayerCount = playerCount;
   startRefreshLoop(appId);
   processingAppId = null;
 }
