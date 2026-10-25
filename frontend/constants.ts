@@ -7,9 +7,6 @@ export const STORAGE_KEY_SINGLE_COLOR = 'playercount-badge.singleColor';
 export const STORAGE_KEY_REFRESH_INTERVAL = 'playercount-badge.refreshInterval';
 export const ACHIEVEMENTS_WAIT_MS = 400;
 
-export const STEAM_PLAYER_COUNT_API =
-  'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/';
-
 export function steamDbChartsUrl(appId: number): string {
   return `https://steamdb.info/app/${appId}/charts/`;
 }
@@ -220,6 +217,14 @@ export function isPluginEnabled(): boolean {
     return localStorage.getItem(STORAGE_KEY_SHOW) !== 'false';
   } catch {
     return true;
+  }
+}
+
+export function setPluginEnabled(enabled: boolean): void {
+  try {
+    localStorage.setItem(STORAGE_KEY_SHOW, String(enabled));
+  } catch {
+    // Storage unavailable; the toggle still applies for this session.
   }
 }
 

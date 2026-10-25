@@ -14,8 +14,6 @@ const PlayBar = (findClassModule?.(
 const KNOWN: Record<string, string> = {
   GameStat:            '_1kiZKVbDe-9Ikootk57kpA',
   GameStatWithIcon:    '_1aKegVl9_lSdNAyWYZQlr9',
-  GameStatIcon:        '_1tIg-QIrwMNtCm7NcYADyi',
-  GameStatIconVariant: '_1GZdosVXnfrf69yU8DWASl',
   GameStatRight:       '_3m_zjRTQBqcfzCjXLXUHcR',
   PlayBarLabel:        '_34lrt5-Fc3usZU6trA1P0-',
   PlayBarDetailLabel:  '_2TYVGoD27ZMfjRirKQNLfk',
@@ -56,6 +54,7 @@ function openSteamDbCharts(appId: number): void {
       openInSystemBrowser(url);
       return;
     } catch {
+      // Fall through to the anchor click below.
     }
   }
 
@@ -138,27 +137,52 @@ export function ensureBadgePosition(row: HTMLElement, badge: HTMLElement): void 
   }
 }
 
-// SteamDB's single-player silhouette, traced to a vector path and painted in
-// Steam's neutral icon gray. Inline SVG renders deterministically at the
-// exact size requested, unlike raster images in Steam's client.
-const PLAYERS_ICON_PATH =
-  'M23.0,3.0L21.0,5.0L21.0,10.0L20.0,11.0L20.0,12.0L21.0,13.0L21.0,15.0L22.0,16.0L22.0,18.0L23.0,19.0L23.0,21.0L22.0,22.0L21.0,22.0L20.0,23.0L17.0,23.0L16.0,24.0L15.0,24.0L14.0,25.0L14.0,26.0L13.0,27.0L13.0,28.0L38.0,28.0L38.0,27.0L37.0,26.0L37.0,25.0L36.0,24.0L35.0,24.0L34.0,23.0L31.0,23.0L28.0,20.0L28.0,19.0L29.0,18.0L29.0,17.0L30.0,16.0L30.0,15.0L31.0,14.0L31.0,6.0L28.0,3.0Z';
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const ICON_STYLE_ID = 'playercount-badge-style';
+const ICON_CLASS = 'playercount-badge-icon';
+
+// Two overlapping players, drawn as an outline on Steam's 26px icon grid. Size,
+// stroke weight and color were measured against the clock and trophy glyphs
+// (24-26px wide, ~2.2px stroke, white at 52% alpha) so it reads as one set.
+const PLAYERS_ICON_SHAPES = [
+  { tag: 'circle', attrs: { cx: '9.3', cy: '7.4', r: '4.3' } },
+  { tag: 'path', attrs: { d: 'M2.1 23.4v-1.5c0-4 3.2-7.3 7.2-7.3s7.2 3.3 7.2 7.3v1.5z' } },
+  { tag: 'path', attrs: { d: 'M17 3.1a4.3 4.3 0 0 1 0 8.6' } },
+  { tag: 'path', attrs: { d: 'M19.6 14.8c2.8.9 4.4 3.4 4.4 6.9v1.7h-4' } },
+];
 
 function createPlayersIcon(doc: Document): SVGSVGElement {
-  const svg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  // Tight viewBox around the glyph itself (traced bounds x:13-38, y:3-28,
-  // plus 1px padding) so no transparent space inflates the icon or its gap.
-  svg.setAttribute('viewBox', '12 2 27 27');
-  svg.setAttribute('width', '24');
-  svg.setAttribute('height', '24');
-  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  const svg = doc.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 26 26');
+  svg.setAttribute('width', '26');
+  svg.setAttribute('height', '26');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'hsla(0, 0%, 100%, 0.52)');
+  svg.setAttribute('stroke-width', '2.2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.style.display = 'block';
 
-  const path = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('fill', '#8f98a0');
-  path.setAttribute('d', PLAYERS_ICON_PATH);
-  svg.appendChild(path);
+  for (const { tag, attrs } of PLAYERS_ICON_SHAPES) {
+    const shape = doc.createElementNS(SVG_NS, tag);
+    for (const [name, value] of Object.entries(attrs)) {
+      shape.setAttribute(name, value);
+    }
+    svg.appendChild(shape);
+  }
 
   return svg;
+}
+
+// Steam hides its own stat icons in the narrow side panel and in the basic UI
+// layout. Mirror that so our icon never crowds the text in those layouts.
+function ensureIconStyle(doc: Document): void {
+  if (doc.getElementById(ICON_STYLE_ID)) return;
+  const style = doc.createElement('style');
+  style.id = ICON_STYLE_ID;
+  style.textContent =
+    `.NarrowRightPanel .${ICON_CLASS}, .BasicUI .${ICON_CLASS} { display: none !important; }`;
+  (doc.head ?? doc.documentElement).appendChild(style);
 }
 
 export function updateBadgeValue(badge: HTMLElement, playerCount: PlayerCount): void {
@@ -200,20 +224,23 @@ export function createBadge(playerCount: PlayerCount, appId: number, doc: Docume
     }
   });
 
+  ensureIconStyle(doc);
+
   const iconDiv = doc.createElement('div');
-  // Style the icon container ourselves instead of reusing Steam's icon
-  // classes. Those classes are version-dependent: on newer Steam clients they
-  // paint the wrong glyph (a clock) instead of our people icon.
+  iconDiv.className = ICON_CLASS;
+  // Use Steam's own icon metrics (30px box, 3px margin) pinned to the top. The
+  // old auto-margin centering floated the glyph down whenever a sibling tile,
+  // such as Achievements with its progress bar, made the row taller than ours,
+  // and the row's overflow clip then cut it off. We still avoid Steam's icon
+  // classes because newer clients paint a clock glyph on them.
   iconDiv.style.display = 'flex';
   iconDiv.style.alignItems = 'center';
   iconDiv.style.justifyContent = 'center';
-  iconDiv.style.alignSelf = 'center';
-  iconDiv.style.marginTop = 'auto';
-  iconDiv.style.marginBottom = 'auto';
-  iconDiv.style.width = '26px';
-  iconDiv.style.height = '24px';
-  iconDiv.style.marginRight = '4px';
+  iconDiv.style.alignSelf = 'flex-start';
   iconDiv.style.flexShrink = '0';
+  iconDiv.style.width = '30px';
+  iconDiv.style.height = '30px';
+  iconDiv.style.margin = '3px';
   iconDiv.appendChild(createPlayersIcon(doc));
 
   const rightDiv = doc.createElement('div');

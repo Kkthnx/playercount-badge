@@ -59,14 +59,19 @@ function startRefreshLoop(appId: number): void {
   refreshIntervalId = setInterval(async () => {
     if (currentAppId !== appId || !isPluginEnabled()) return;
 
-    const badge = panelDoc?.getElementById(BADGE_ID);
-    if (!badge) return;
+    if (!panelDoc?.getElementById(BADGE_ID)) return;
 
     const playerCount = await fetchPlayerCount(appId, { bypassCache: true });
     if (currentAppId !== appId || !playerCount) return;
 
     lastPlayerCount = playerCount;
-    updateBadgeValue(badge, playerCount);
+    // Look the badge up again: Steam may have re-rendered the row during the
+    // request, which would leave a reference taken before it pointing at a
+    // detached node.
+    const badge = panelDoc?.getElementById(BADGE_ID) as HTMLElement | null;
+    if (badge) {
+      updateBadgeValue(badge, playerCount);
+    }
   }, intervalMs);
 }
 
@@ -137,7 +142,9 @@ async function _handleGamePage(doc: Document, mode: UIMode): Promise<void> {
 
   if (currentAppId !== appId) {
     clearCurrentBadge();
-    clearPlayerCountCache(currentAppId ?? undefined);
+    if (currentAppId !== null) {
+      clearPlayerCountCache(currentAppId);
+    }
     currentAppId = appId;
     processingAppId = null;
   }
@@ -177,7 +184,7 @@ async function _handleGamePage(doc: Document, mode: UIMode): Promise<void> {
 
   const deadline = Date.now() + ACHIEVEMENTS_WAIT_MS;
   while (Date.now() < deadline) {
-    const rowNow = target.doc.getElementById(target.row.id as string) ?? target.row;
+    const rowNow = findToolbarRow()?.row ?? target.row;
     const hasAchievements = Array.from(rowNow.children).some(
       el => el.textContent?.includes('Achievements'),
     );

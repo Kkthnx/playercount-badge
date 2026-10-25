@@ -19,9 +19,9 @@ import {
   resetCustomColors,
   setColorSchemeId,
   setCustomColors,
+  setPluginEnabled,
   setRefreshIntervalSeconds,
   setSingleColor,
-  STORAGE_KEY_SHOW,
 } from './constants';
 import type { ColorSchemeId } from './constants';
 import { UIMode } from './injection/detector';
@@ -99,7 +99,7 @@ function PluginSettings() {
           value={showBadge}
           onChange={(value: boolean) => {
             setShowBadge(value);
-            localStorage.setItem(STORAGE_KEY_SHOW, String(value));
+            setPluginEnabled(value);
             if (!value) {
               disconnectObserver();
             } else {
@@ -129,48 +129,47 @@ function PluginSettings() {
       </Field>
 
       {schemeId === 'single' && (
-        <Field label="Badge color">
-          <input
-            type="color"
-            className="pcb-swatch"
-            value={singleColor}
-            onChange={(e) => applySingleColor(e.target.value)}
-            style={SWATCH_STYLE}
-            aria-label="Pick badge color"
-          />
-        </Field>
-      )}
-
-      {schemeId === 'single' && (
-        <Field
-          label="Reset badge color"
-          description="Restore the default Steam blue."
-        >
-          <Button onClick={handleResetSingle}>Reset</Button>
-        </Field>
-      )}
-
-      {schemeId === 'custom' &&
-        customColors.map((color, i) => (
-          <Field key={TIER_LABELS[i]} label={TIER_LABELS[i]}>
+        <>
+          <Field label="Badge color">
             <input
               type="color"
               className="pcb-swatch"
-              value={color}
-              onChange={(e) => applyCustomColor(i, e.target.value)}
+              value={singleColor}
+              onChange={(e) => applySingleColor(e.target.value)}
               style={SWATCH_STYLE}
-              aria-label={`Pick color for ${TIER_LABELS[i]}`}
+              aria-label="Pick badge color"
             />
           </Field>
-        ))}
+          <Field
+            label="Reset badge color"
+            description="Restore the default Steam blue."
+          >
+            <Button onClick={handleResetSingle}>Reset</Button>
+          </Field>
+        </>
+      )}
 
       {schemeId === 'custom' && (
-        <Field
-          label="Reset custom colors"
-          description="Restore the default palette for all five tiers."
-        >
-          <Button onClick={handleResetCustom}>Reset</Button>
-        </Field>
+        <>
+          {customColors.map((color, i) => (
+            <Field key={TIER_LABELS[i]} label={TIER_LABELS[i]}>
+              <input
+                type="color"
+                className="pcb-swatch"
+                value={color}
+                onChange={(e) => applyCustomColor(i, e.target.value)}
+                style={SWATCH_STYLE}
+                aria-label={`Pick color for ${TIER_LABELS[i]}`}
+              />
+            </Field>
+          ))}
+          <Field
+            label="Reset custom colors"
+            description="Restore the default palette for all five tiers."
+          >
+            <Button onClick={handleResetCustom}>Reset</Button>
+          </Field>
+        </>
       )}
     </div>
   );
